@@ -31,30 +31,36 @@ def Res_conv2d( inputs, shortcut, filters, shape, stride = ( 1, 1 ), training = 
 
 
 def model( inputs, training ):
-    layer = conv2d( inputs, 32, [3, 3], training = training )
-    layer = conv2d( layer, 64, [3, 3], ( 2, 2 ), training = training )
-    shortcut = layer
+    with tf.variable_scope('conv1-5') as scope:
+        layer = conv2d( inputs, 32, [3, 3], training = training )
+        layer = conv2d( layer, 64, [3, 3], ( 2, 2 ), training = training )
+        shortcut = layer
+        layer = conv2d( layer, 32, [1, 1], training = training )
+        layer = Res_conv2d( layer, shortcut, 64, [3, 3], training = training )
 
-    layer = conv2d( layer, 32, [1, 1], training = training )
-    layer = Res_conv2d( layer, shortcut, 64, [3, 3], training = training )
+        layer = conv2d( layer, 128, [3, 3], ( 2, 2 ), training = training )
+        shortcut = layer
 
-    layer = conv2d( layer, 128, [3, 3], ( 2, 2 ), training = training )
-    shortcut = layer
 
-    for _ in range( 2 ):
-        layer = conv2d( layer, 64, [1, 1], training = training )
-        layer = Res_conv2d( layer, shortcut, 128, [3, 3], training = training )
+    with tf.variable_scope('conv6-7') as scope:
+        for _ in range( 2 ):
+            layer = conv2d( layer, 64, [1, 1], training = training )
+            layer = Res_conv2d( layer, shortcut, 128, [3, 3], training = training )
+        layer = conv2d( layer, 256, [3, 3], ( 2, 2 ), training = training )
+        shortcut = layer
 
-    layer = conv2d( layer, 256, [3, 3], ( 2, 2 ), training = training )
-    shortcut = layer
 
-    for _ in range( 8 ):
-        layer = conv2d( layer, 128, [1, 1], training = training )
-        layer = Res_conv2d( layer, shortcut, 256, [3, 3], training = training )
-    pre_scale3 = layer
+    with tf.variable_scope('conv8-15') as scope:
+        for _ in range( 8 ):
+            layer = conv2d( layer, 128, [1, 1], training = training )
+            layer = Res_conv2d( layer, shortcut, 256, [3, 3], training = training )
+        pre_scale3 = layer
 
-    layer = conv2d( layer, 512, [3, 3], ( 2, 2 ), training = training )
-    shortcut = layer
+        layer = conv2d( layer, 512, [3, 3], ( 2, 2 ), training = training )
+        shortcut = layer
+
+    
+    
 
     for _ in range( 8 ):
         layer = conv2d( layer, 256, [1, 1], training = training )
