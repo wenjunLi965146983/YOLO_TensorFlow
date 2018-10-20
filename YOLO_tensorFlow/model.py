@@ -61,19 +61,20 @@ def model( inputs, training ):
 
     
     
+    with tf.variable_scope('conv16-23') as scope:
+        for _ in range( 8 ):
+            layer = conv2d( layer, 256, [1, 1], training = training )
+            layer = Res_conv2d( layer, shortcut, 512, [3, 3], training = training )
+        pre_scale2 = layer
 
-    for _ in range( 8 ):
-        layer = conv2d( layer, 256, [1, 1], training = training )
-        layer = Res_conv2d( layer, shortcut, 512, [3, 3], training = training )
-    pre_scale2 = layer
+        layer = conv2d( layer, 1024, [3, 3], ( 2, 2 ), training = training )
+        shortcut = layer
 
-    layer = conv2d( layer, 1024, [3, 3], ( 2, 2 ), training = training )
-    shortcut = layer
-
-    for _ in range( 4 ):
-        layer = conv2d( layer, 512, [1, 1], training = training )
-        layer = Res_conv2d( layer, shortcut, 1024, [3, 3], training = training )
-    pre_scale1 = layer
+    with tf.variable_scope('conv24-27') as scope:
+         for _ in range( 4 ):
+             layer = conv2d( layer, 512, [1, 1], training = training )
+             layer = Res_conv2d( layer, shortcut, 1024, [3, 3], training = training )
+         pre_scale1 = layer
 
     return pre_scale1, pre_scale2, pre_scale3
     
